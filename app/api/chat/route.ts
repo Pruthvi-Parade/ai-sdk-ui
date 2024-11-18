@@ -7,13 +7,13 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
-
+  console.log("Messages: ",messages);
+  
   try {
     const result = await streamText({
       model: groq('gemma2-9b-it'),
       messages,
     });
-
     return result.toDataStreamResponse();
   } catch (error) {
     console.error('Error in chat API:', error);
