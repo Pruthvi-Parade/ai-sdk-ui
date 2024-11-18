@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     console.error('Error in chat API:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Failed to connect to OpenAI API. Please try again later.'
+        error: `Failed to connect to OpenAI API. Please try again later.  ${error}`
       }),
       { 
         status: 500,
