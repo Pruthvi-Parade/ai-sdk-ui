@@ -1,4 +1,5 @@
-import { openai } from '@ai-sdk/openai';
+// import { openai } from '@ai-sdk/openai';
+import { groq } from '@ai-sdk/groq';
 import { streamText } from 'ai';
 
 // Allow streaming responses up to 30 seconds
@@ -9,7 +10,7 @@ export async function POST(req: Request) {
 
   try {
     const result = await streamText({
-      model: openai('gpt-3.5-turbo'),
+      model: groq('gemma2-9b-it'),
       messages,
     });
 
