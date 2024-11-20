@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/config";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ export default function SignupPage() {
     confirmPassword: "",
   });
 
-  
+  const router = useRouter()
   const validatePassword = (password: string) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters long";
@@ -59,7 +60,13 @@ export default function SignupPage() {
           // Signed up
           // const user = userCredential.user;
           console.log("User Cred: ", userCredential);
-
+          setFormData({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+          });
+          router.push("/")
           // ...
         })
         .catch((error: { code: string; message: string }) => {

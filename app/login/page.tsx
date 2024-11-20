@@ -1,8 +1,47 @@
 "use client";
 
 import Button from "@/components/ui/Button";
+import { FormEvent, useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/app/firebase/config";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const router = useRouter()
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log("Form submitted with data:", formData);
+    signInWithEmailAndPassword(auth, formData.email, formData.password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log(user);
+        setFormData({
+          email: "",
+          password: "",
+        })
+        router.push("/")
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+      });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="w-full max-w-md space-y-8">
@@ -15,7 +54,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
               <label
@@ -32,6 +71,8 @@ export default function LoginPage() {
                 required
                 className="mt-1 block w-full rounded border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
               />
             </div>
 
@@ -50,6 +91,8 @@ export default function LoginPage() {
                 required
                 className="mt-1 block w-full rounded border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
               />
             </div>
           </div>
