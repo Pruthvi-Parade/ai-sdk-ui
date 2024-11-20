@@ -1,10 +1,30 @@
 'use client';
 import { useChat } from 'ai/react';
+import { onAuthStateChanged } from "firebase/auth";
+import {auth} from "@/app/firebase/config";
+import { useRouter } from 'next/navigation';
 // import { FileUploader } from "@/components/FileUploader"
 // import Button from "@/components/ui/Button";
 // import Link from "next/link"
 
 export default function Chat() {
+  const router = useRouter();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/auth.user
+      console.log("User: ",user);
+      const uid = user.uid;
+      console.log("UID: ",uid);
+      // ...
+    } else {
+      // User is signed out
+      // ...
+      console.log("User not found");
+      router.push("/login")
+    }
+  });
+
   const { messages, input, handleInputChange, handleSubmit } = useChat();
   return (
     // <main className="min-h-screen bg-background p-8">

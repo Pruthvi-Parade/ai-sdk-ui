@@ -4,13 +4,14 @@ import Button from "@/components/ui/Button";
 import { FormEvent, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/config";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
+  const router = useRouter()
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log("Form submitted with data:", formData);
@@ -19,6 +20,11 @@ export default function LoginPage() {
         // Signed in
         const user = userCredential.user;
         console.log(user);
+        setFormData({
+          email: "",
+          password: "",
+        })
+        router.push("/")
         // ...
       })
       .catch((error) => {
