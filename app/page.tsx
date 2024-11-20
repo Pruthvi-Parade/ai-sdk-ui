@@ -9,7 +9,7 @@ export default function Chat() {
   return (
     // <main className="min-h-screen bg-background p-8">
     //   <div className="mx-auto max-w-4xl space-y-8">
-    //     <h1 className="text-4xl font-bold text-foreground">Welcome to Dark Chat</h1>
+    //     <h1 className="text-4xl font-bold text-foreground">Welcome to ConvoCraft</h1>
     //     <div className="grid gap-6">
     //       <FileUploader />
     //       <div className="flex gap-4">

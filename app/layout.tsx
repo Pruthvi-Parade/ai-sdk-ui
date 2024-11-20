@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/Toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Dark Chat App",
+  title: "ConvoCraft",
   description: "Professional dark theme chat application",
 }
 
