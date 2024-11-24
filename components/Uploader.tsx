@@ -1,15 +1,27 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import { useState } from "react";
 import { Upload } from "lucide-react";
 
 export function FileUploader() {
   const [files, setFiles] = useState<File[]>([]);
 
-  const onDrop = useCallback(setFiles, []);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    setFiles(droppedFiles);
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(selectedFiles);
+    }
+  };
 
   const handleUpload = () => {
     files.forEach(file => console.log(file));
@@ -18,14 +30,23 @@ export function FileUploader() {
   return (
     <div className="text-center">
       <div
-        {...getRootProps()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-gray-400 transition-colors"
       >
-        <input {...getInputProps()} />
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="mt-2 text-sm text-gray-600">
-          {isDragActive ? "Drop the files here ..." : "Drag and drop some files here, or click to select files"}
-        </p>
+        <input
+          type="file"
+          onChange={handleFileInput}
+          className="hidden"
+          id="fileInput"
+          multiple
+        />
+        <label htmlFor="fileInput" className="cursor-pointer">
+          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-2 text-sm text-gray-600">
+            Drag and drop some files here, or click to select files
+          </p>
+        </label>
         {files.length > 0 && (
           <div className="mt-4">
             <h4 className="text-sm font-medium text-gray-900">Uploaded files:</h4>
