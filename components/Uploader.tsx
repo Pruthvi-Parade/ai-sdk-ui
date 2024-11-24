@@ -1,22 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { Upload } from "lucide-react";
 
 export function FileUploader() {
   const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
     setFiles(droppedFiles);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
       setFiles(selectedFiles);
@@ -30,23 +39,24 @@ export function FileUploader() {
   return (
     <div className="text-center">
       <div
+        onClick={() => fileInputRef.current?.click()}
+        onDragEnter={handleDragEnter}
+        onDragOver={(e) => e.preventDefault()}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onDragOver={handleDragOver}
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-gray-400 transition-colors"
       >
         <input
           type="file"
-          onChange={handleFileInput}
+          ref={fileInputRef}
+          onChange={handleFileSelect}
           className="hidden"
-          id="fileInput"
           multiple
         />
-        <label htmlFor="fileInput" className="cursor-pointer">
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">
-            Drag and drop some files here, or click to select files
-          </p>
-        </label>
+        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+        <p className="mt-2 text-sm text-gray-600">
+          {isDragging ? "Drop the files here ..." : "Drag and drop some files here, or click to select files"}
+        </p>
         {files.length > 0 && (
           <div className="mt-4">
             <h4 className="text-sm font-medium text-gray-900">Uploaded files:</h4>
