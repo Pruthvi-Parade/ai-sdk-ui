@@ -32,8 +32,27 @@ export function FileUploader() {
     }
   };
 
-  const handleUpload = () => {
-    files.forEach(file => console.log(file));
+  const handleUpload = async () => {
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      console.log('Upload successful:', data);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    }
   };
 
   return (
