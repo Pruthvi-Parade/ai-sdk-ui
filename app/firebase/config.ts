@@ -1,4 +1,4 @@
-import { initializeApp, FirebaseApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -24,7 +24,28 @@ const firebaseConfig: FirebaseConfig = {
 };
 
 // Initialize Firebase
-const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const database = getDatabase(app); 
-const auth = getAuth(app);
-export {app, auth, database};
+export function initFirebaseClient() {
+  if (typeof window !== 'undefined') {
+    if (!getApps().length) {
+      const app = initializeApp(firebaseConfig);
+      return {
+        app,
+        auth: getAuth(app),
+        database: getDatabase(app)
+      };
+    } else {
+      const app = getApp();
+      return {
+        app,
+        auth: getAuth(app),
+        database: getDatabase(app)
+      };
+    }
+  }
+  return null;
+}
+
+// Hook to use Firebase safely in client components
+export function useFirebase() {
+  return initFirebaseClient();
+}

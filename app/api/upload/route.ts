@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import * as pdfjsLib from "pdfjs-dist";
-import { database } from "../../firebase/config"; // Import the database
-import { push, ref } from "firebase/database"; // Import necessary functions from Firebase
+import { defaultAuth, defaultDatabase } from "@/app/firebase/server-config"; // Import the database
 
 // import { createCanvas, loadImage } from 'canvas'; // Required for Node.js rendering
 
@@ -48,12 +47,22 @@ export async function POST(request: Request) {
             textContent = (await Promise.all(pageTextPromises)).join("\n\n");
             content = Buffer.from(arrayBuffer).toString("base64");
             if (textContent) {
-              try {
-                const fileRef = ref(database, "documents"); // Create a reference for the file
-                const data = await push(fileRef, { name: file.name }); // Store the file name in the database
-                console.log("Data: ", data);
-              } catch (error) {
-                console.error("Error storing file in database:", error);
+              // console.log("Auth current user: ",defaultAuth);
+              
+              // Check if the user is authenticated
+              if (defaultAuth) {
+                // Ensure you have access to the auth object
+                try {
+                  const fileRef = defaultDatabase.ref('documents'); // Create a reference for the file
+                  const snapshot = await fileRef.once('value');
+                  console.log("Data: ", snapshot.val());
+                } catch (error) {
+                  console.error("Error storing file in database:", error);
+                }
+              } else {
+                console.error(
+                  "User is not authenticated. Cannot store file in database."
+                );
               }
             }
           } else if (

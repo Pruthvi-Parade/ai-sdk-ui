@@ -48,8 +48,8 @@ export function FileUploader() {
         throw new Error('Upload failed');
       }
 
-      const data = await response.json();
-      console.log('Upload successful:', data);
+      // const data = await response.json();
+      // console.log('Upload successful:', data);
     } catch (error) {
       console.error('Error uploading files:', error);
     }

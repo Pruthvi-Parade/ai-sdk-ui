@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
+import { useFirebase } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
@@ -19,8 +19,10 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
-
-  const router = useRouter()
+  const router = useRouter();
+  const firebase = useFirebase();
+  const firebaseAuth = firebase ? firebase.auth : undefined;
+  
   const validatePassword = (password: string) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters long";
@@ -52,35 +54,31 @@ export default function SignupPage() {
       confirmPassword: confirmPasswordError,
     });
 
-    if (!passwordError && !confirmPasswordError) {
-      console.log("Form submitted with data:", formData);
-      console.log("Form submitted with data:", auth);
-      createUserWithEmailAndPassword(auth, formData.email, formData.password)
-        .then((userCredential) => {
-          // Signed up
-          // const user = userCredential.user;
-          console.log("User Cred: ", userCredential);
-          setFormData({
-            name: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
+      if (!passwordError && !confirmPasswordError && firebaseAuth) {
+        createUserWithEmailAndPassword(firebaseAuth, formData.email, formData.password)
+          .then((userCredential) => {
+            // Signed up
+            console.log("User Cred: ", userCredential);
+            setFormData({
+              name: "",
+              email: "",
+              password: "",
+              confirmPassword: "",
+            });
+            router.push("/");
+          })
+          .catch((error: { code: string; message: string }) => {
+            // Handle specific error cases
+            console.error(
+              "Signup error:",
+              error.code,
+              error.message,
+              "------",
+              error
+            );
           });
-          router.push("/")
-          // ...
-        })
-        .catch((error: { code: string; message: string }) => {
-          // Handle specific error cases
-          console.error(
-            "Signup error:",
-            error.code,
-            error.message,
-            "------",
-            error
-          );
-          // ..
-        });
-    }
+      }
+    
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
