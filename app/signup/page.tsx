@@ -6,6 +6,7 @@ import { FormEvent, useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useFirebase } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
+import { push, ref } from "firebase/database";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ export default function SignupPage() {
   const router = useRouter();
   const firebase = useFirebase();
   const firebaseAuth = firebase ? firebase.auth : undefined;
+  const firebaseDatabase = firebase ? firebase.database : undefined;
   
   const validatePassword = (password: string) => {
     if (password.length < 8) {
@@ -54,31 +56,49 @@ export default function SignupPage() {
       confirmPassword: confirmPasswordError,
     });
 
-      if (!passwordError && !confirmPasswordError && firebaseAuth) {
-        createUserWithEmailAndPassword(firebaseAuth, formData.email, formData.password)
-          .then((userCredential) => {
-            // Signed up
-            console.log("User Cred: ", userCredential);
-            setFormData({
-              name: "",
-              email: "",
-              password: "",
-              confirmPassword: "",
-            });
-            router.push("/");
-          })
-          .catch((error: { code: string; message: string }) => {
-            // Handle specific error cases
-            console.error(
-              "Signup error:",
-              error.code,
-              error.message,
-              "------",
-              error
-            );
+    if (!passwordError && !confirmPasswordError && firebaseAuth) {
+      createUserWithEmailAndPassword(firebaseAuth, formData.email, formData.password)
+        .then((userCredential) => {
+          // Signed up
+          console.log("User Cred: ", userCredential);
+          const user = userCredential.user;
+          const userData = {
+            name: formData.name,
+            email: formData.email,
+            creationDate: new Date().toISOString(),
+            uid: user.uid,
+          };
+
+          if (firebaseDatabase) {
+            const userRef = ref(firebaseDatabase, `users`);
+            push(userRef, userData)
+              .then(() => {
+                console.log("User data saved successfully");
+              })
+              .catch((error) => {
+                console.error("Error saving user data:", error);
+              });
+          }
+
+          setFormData({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
           });
-      }
-    
+          router.push("/");
+        })
+        .catch((error: { code: string; message: string }) => {
+          // Handle specific error cases
+          console.error(
+            "Signup error:",
+            error.code,
+            error.message,
+            "------",
+            error
+          );
+        });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

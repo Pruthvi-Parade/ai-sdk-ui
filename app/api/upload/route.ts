@@ -53,9 +53,18 @@ export async function POST(request: Request) {
               if (defaultAuth) {
                 // Ensure you have access to the auth object
                 try {
-                  const fileRef = defaultDatabase.ref('documents'); // Create a reference for the file
-                  const snapshot = await fileRef.once('value');
-                  console.log("Data: ", snapshot.val());
+                  const fileRef = defaultDatabase.ref(`documents`); // Create a reference for the file
+                  const docData = {
+                    name: file.name,
+                    type: "pdf",
+                    uploadedAt: new Date().toISOString(),
+                    size: file.size,
+                    pages: maxPages,
+                    status: "completed",
+                    // textContent
+                  };
+
+                  await fileRef.push(docData);
                 } catch (error) {
                   console.error("Error storing file in database:", error);
                 }
