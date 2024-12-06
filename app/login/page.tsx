@@ -3,7 +3,7 @@
 import Button from "@/components/ui/Button";
 import { FormEvent, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
+import { useFirebase } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -11,34 +11,39 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-  const router = useRouter()
+  const router = useRouter();
+  const firebase = useFirebase();
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log("Form submitted with data:", formData);
-    signInWithEmailAndPassword(auth, formData.email, formData.password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        console.log(user);
-        setFormData({
-          email: "",
-          password: "",
+    if (firebase) {
+      const { auth } = firebase;
+      signInWithEmailAndPassword(auth, formData.email, formData.password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log(user);
+          setFormData({
+            email: "",
+            password: "",
+          });
+          router.push("/");
         })
-        router.push("/")
-        // ...
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
-      });
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode, errorMessage);
+        });
+    } else {
+      console.error("Authentication service is not available.");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -112,8 +117,6 @@ export default function LoginPage() {
             <Button className="w-full transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">
               Sign in
             </Button>
-
-           
           </div>
         </form>
       </div>

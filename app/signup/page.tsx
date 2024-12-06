@@ -4,8 +4,9 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
+import { useFirebase } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
+import { push, ref } from "firebase/database";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -19,8 +20,11 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
-
-  const router = useRouter()
+  const router = useRouter();
+  const firebase = useFirebase();
+  const firebaseAuth = firebase ? firebase.auth : undefined;
+  const firebaseDatabase = firebase ? firebase.database : undefined;
+  
   const validatePassword = (password: string) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters long";
@@ -52,22 +56,37 @@ export default function SignupPage() {
       confirmPassword: confirmPasswordError,
     });
 
-    if (!passwordError && !confirmPasswordError) {
-      console.log("Form submitted with data:", formData);
-      console.log("Form submitted with data:", auth);
-      createUserWithEmailAndPassword(auth, formData.email, formData.password)
+    if (!passwordError && !confirmPasswordError && firebaseAuth) {
+      createUserWithEmailAndPassword(firebaseAuth, formData.email, formData.password)
         .then((userCredential) => {
           // Signed up
-          // const user = userCredential.user;
           console.log("User Cred: ", userCredential);
+          const user = userCredential.user;
+          const userData = {
+            name: formData.name,
+            email: formData.email,
+            creationDate: new Date().toISOString(),
+            uid: user.uid,
+          };
+
+          if (firebaseDatabase) {
+            const userRef = ref(firebaseDatabase, `users`);
+            push(userRef, userData)
+              .then(() => {
+                console.log("User data saved successfully");
+              })
+              .catch((error) => {
+                console.error("Error saving user data:", error);
+              });
+          }
+
           setFormData({
             name: "",
             email: "",
             password: "",
             confirmPassword: "",
           });
-          router.push("/")
-          // ...
+          router.push("/");
         })
         .catch((error: { code: string; message: string }) => {
           // Handle specific error cases
@@ -78,7 +97,6 @@ export default function SignupPage() {
             "------",
             error
           );
-          // ..
         });
     }
   };
