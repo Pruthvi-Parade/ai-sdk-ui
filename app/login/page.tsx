@@ -15,7 +15,7 @@ export default function LoginPage() {
   const firebase = useFirebase();
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted with data:", formData);
+    // console.log("Form submitted with data:", formData);
     if (firebase) {
       const { auth } = firebase;
       signInWithEmailAndPassword(auth, formData.email, formData.password)

@@ -3,11 +3,11 @@
 import { useState, useRef, ChangeEvent } from "react";
 import { Upload } from "lucide-react";
 
-export function FileUploader() {
+export function FileUploader({ user }: { user: { uid: string} }) {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -37,6 +37,7 @@ export function FileUploader() {
       const formData = new FormData();
       files.forEach(file => {
         formData.append('files', file);
+        formData.append('userKey', user.uid)
       });
 
       const response = await fetch('/api/upload', {
